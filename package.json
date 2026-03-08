@@ -1,0 +1,14 @@
+{
+  "name": "kiberone-zameny",
+  "private": true,
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "cd backend && npm run test",
+    "test:integration": "cd tests && npm run test",
+    "db:push": "supabase db push",
+    "db:reset": "supabase db reset"
+  },
+  "description": "Замены KIBERone — управление расписанием преподавателей"
+}

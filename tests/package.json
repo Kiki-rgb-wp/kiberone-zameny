@@ -1,0 +1,8 @@
+{
+  "name": "kiberone-zameny-tests",
+  "private": true,
+  "scripts": {
+    "test": "node --test integration/*.test.js"
+  },
+  "description": "Интеграционные тесты (опционально с тестовой БД Supabase)"
+}

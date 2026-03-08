@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Замены KIBERone</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="/src/main.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Экран входа -->
+    <section id="login-screen" class="screen">
+      <div class="card">
+        <h1>Замены KIBERone</h1>
+        <form id="login-form">
+          <input type="email" name="email" placeholder="Email" required />
+          <input type="password" name="password" placeholder="Пароль" required />
+          <button type="submit">Войти</button>
+        </form>
+        <p id="login-error" class="error hidden"></p>
+        <p class="card-footer">Нет аккаунта? <button type="button" id="show-register" class="link-btn">Регистрация</button></p>
+      </div>
+
+      <!-- Экран регистрации -->
+      <div id="register-card" class="card hidden">
+        <h1>Регистрация</h1>
+        <p class="muted">Преподаватели регистрируются сами. После входа вы сможете видеть расписание и откликаться на замены.</p>
+        <form id="register-form">
+          <input type="text" name="name" placeholder="ФИО" required />
+          <input type="email" name="email" placeholder="Email" required />
+          <input type="password" name="password" placeholder="Пароль (минимум 6 символов)" required minlength="6" />
+          <div class="role-choice">
+            <span class="role-label">Я:</span>
+            <label class="role-option"><input type="radio" name="role" value="tutor" checked /> <span class="radio-custom"></span> Тьютор</label>
+            <label class="role-option"><input type="radio" name="role" value="assistant" /> <span class="radio-custom"></span> Ассистент</label>
+          </div>
+          <button type="submit">Зарегистрироваться</button>
+        </form>
+        <p id="register-error" class="error hidden"></p>
+        <p class="card-footer"><button type="button" id="show-login" class="link-btn">← Назад к входу</button></p>
+      </div>
+    </section>
+
+    <!-- Основной экран после входа -->
+    <section id="main-screen" class="screen hidden">
+      <header class="header">
+        <h1>Замены KIBERone</h1>
+        <span id="user-info"></span>
+        <button type="button" id="logout-btn">Выйти</button>
+      </header>
+
+      <!-- Только для админа: добавить смену и сгенерировать месяц -->
+      <section id="admin-add-shift" class="section hidden">
+        <h2>Управление расписанием</h2>
+        <div class="admin-actions">
+          <button type="button" id="btn-add-shift">Добавить смену</button>
+          <div class="generate-month">
+            <label>Сгенерировать по образцу предыдущего месяца:</label>
+            <input type="number" id="gen-year" min="2024" max="2030" placeholder="Год" />
+            <input type="number" id="gen-month" min="1" max="12" placeholder="Месяц" />
+            <button type="button" id="btn-generate-month">Создать смены на месяц</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Календарная сетка месяца: строки — дни, столбцы — слоты или наоборот -->
+      <section class="section">
+        <h2>Моё расписание</h2>
+        <div id="schedule-calendar" class="calendar-grid">
+          <!-- Заполняется JS: ячейки по дням, кнопка «Найти замену» в свободных -->
+        </div>
+        <div id="schedule-list"></div>
+      </section>
+
+      <!-- Кнопка «Создать заявку на замену» открывает форму -->
+      <section class="section">
+        <h2>Заявки на замену</h2>
+        <button type="button" id="btn-new-request">Найти замену</button>
+        <div id="replacements-list"></div>
+      </section>
+
+      <!-- Форма: запрос замены (Дата, Время, Локация, Причина; ФИО автоматически) -->
+      <dialog id="dialog-request">
+        <form id="form-request">
+          <h3>Новая заявка на замену</h3>
+          <p>От имени: <strong id="request-requester-name"></strong></p>
+          <label>Дата <input type="date" name="date" required /></label>
+          <label>Время <input type="time" name="time" /></label>
+          <label>Локация <input type="text" name="location" placeholder="Кабинет / филиал" /></label>
+          <label>Причина <textarea name="reason" rows="2"></textarea></label>
+          <div class="actions">
+            <button type="submit">Создать заявку</button>
+            <button type="button" id="cancel-request">Отмена</button>
+          </div>
+        </form>
+      </dialog>
+
+      <!-- Модальное окно отклика: «Могу» / «Не могу»; при «Не могу» — поле причины -->
+      <dialog id="dialog-response">
+        <form id="form-response">
+          <h3>Отклик на заявку</h3>
+          <p id="response-request-info"></p>
+          <input type="hidden" name="request_id" />
+          <div class="actions">
+            <button type="button" name="can_cover" value="true">Могу</button>
+            <button type="button" name="can_cover" value="false">Не могу</button>
+          </div>
+          <div id="response-decline-reason" class="hidden">
+            <label>Причина отказа (видна только админу) <textarea name="reason" rows="2"></textarea></label>
+            <button type="submit">Отправить отказ</button>
+          </div>
+          <button type="button" id="cancel-response">Закрыть</button>
+        </form>
+      </dialog>
+
+      <!-- Форма добавления смены (только админ) -->
+      <dialog id="dialog-add-shift">
+        <form id="form-add-shift">
+          <h3>Добавить смену</h3>
+          <label>Преподаватель <select name="user_id" required></select></label>
+          <label>Дата <input type="date" name="date" required /></label>
+          <label>Время <input type="time" name="time" /></label>
+          <label>Локация <input type="text" name="location" placeholder="Кабинет / филиал" /></label>
+          <label>Предмет <input type="text" name="subject" placeholder="Необязательно" /></label>
+          <div class="actions">
+            <button type="submit">Добавить</button>
+            <button type="button" id="cancel-add-shift">Отмена</button>
+          </div>
+        </form>
+      </dialog>
+    </section>
+
+    <!-- Всплывающие уведомления: «Заявка создана», «Замена выполнена» и т.д. -->
+    <div id="toast-container" class="toast-container"></div>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
