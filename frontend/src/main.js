@@ -1,8 +1,10 @@
 /**
  * Точка входа UI «Замены KIBERone».
- * В dev: /api (прокси на бэкенд). В продакшене (Telegram Mini App): VITE_API_URL.
+ * В dev: /api (прокси на бэкенд). В продакшене: VITE_API_URL (задать на Vercel и пересобрать).
  */
 const API = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '') || '/api';
+// Если в продакшене API не задан — запросы пойдут на тот же домен и не дойдут до бэкенда
+const isApiConfigured = API.startsWith('http');
 
 let token = localStorage.getItem('token');
 let user = JSON.parse(localStorage.getItem('user') || 'null');
@@ -119,7 +121,11 @@ registerForm.addEventListener('submit', async (e) => {
       showLoginCard();
     }
   } catch (err) {
-    registerError.textContent = 'Нет связи с сервером';
+    if (!isApiConfigured) {
+      registerError.textContent = 'Не задан URL API. На Vercel добавьте VITE_API_URL и сделайте Redeploy.';
+    } else {
+      registerError.textContent = 'Нет связи с сервером.';
+    }
     registerError.classList.remove('hidden');
   }
 });
@@ -155,7 +161,11 @@ loginForm.addEventListener('submit', async (e) => {
     }
     showScreen(true);
   } catch (err) {
-    loginError.textContent = 'Нет связи с сервером';
+    if (!isApiConfigured) {
+      loginError.textContent = 'Не задан URL API. На Vercel добавьте переменную VITE_API_URL (URL бэкенда Railway) и сделайте Redeploy.';
+    } else {
+      loginError.textContent = 'Нет связи с сервером. Проверьте, что бэкенд на Railway запущен и URL верный.';
+    }
     loginError.classList.remove('hidden');
   }
 });
