@@ -15,7 +15,8 @@ const { errorHandler } = require('./middleware/error');
 
 const app = express();
 
-app.use(cors({ origin: true }));
+// Разрешаем запросы с любого источника (Vercel, Telegram Mini App и т.д.)
+app.use(cors({ origin: true, credentials: false }));
 app.use(express.json());
 
 // Публичный вход

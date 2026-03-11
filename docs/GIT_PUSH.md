@@ -46,3 +46,19 @@ git push -u origin main
 ```
 
 Если GitHub попросит авторизацию — используй **Personal Access Token** вместо пароля (GitHub → Settings → Developer settings → Personal access tokens → Generate new token).
+
+---
+
+## Если пуш отклонили из‑за «repository rule violations» / secret scanning
+
+В коммите не должно быть реальных ключей. В `.env.example` должны быть только **плейсхолдеры** (как в шаблоне выше), не подставляй туда настоящие ключи.
+
+После того как убрал секреты из `.env.example`, перезаписать последний коммит и отправить снова:
+
+```bash
+git add .env.example
+git commit --amend --no-edit
+git push -u origin main
+```
+
+**Важно:** если реальные ключи Supabase уже попадали в репозиторий (или в скриншот), в Supabase Dashboard смени их: **Project Settings → API → Regenerate** anon key и service_role key, затем пропиши новые значения в `backend/.env` локально (файл `.env` в репо не коммитится).
